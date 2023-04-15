@@ -14,6 +14,29 @@ class PicButtonDesignParams:
         self.focuse_pic = ""
         self.pic = ""
 
+class Image(pygame.sprite.Sprite):
+    def __init__(self, pos=(0, 0), size=(10, 10),
+                 image="", *groups) -> None:
+        super().__init__(*groups)
+        self.x, self.y = pos
+        self.h, self.w = size
+
+        self.image_loaded = pygame.image.load(image)
+        self.image_loaded = pygame.transform.scale(
+            self.image_loaded, size
+        )
+        
+        self.rect = pygame.rect.Rect(pos, size)
+        self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+
+    def draw(self):
+        self.image.blit(
+            self.image_loaded, (0,0)
+        )
+    
+    def update(self, *events) -> None:
+        self.draw()
+
 class Button(pygame.sprite.Sprite):
     def __init__(self, pos=(0, 0), size=(10, 10), 
             text="", design: ButtonDesignParams=ButtonDesignParams(), onClick=None, *groups):
@@ -209,3 +232,19 @@ class SliderWithValue(pygame.sprite.Sprite):
         self.inner_group.update(*events)
         
         self.draw()
+
+
+class Catcher:
+    def __init__(self, code, callback):
+        self.code = code
+        self.callback = callback
+        self.clicked = False
+
+    def update(self, *events):
+        for event in events[0]:
+            if event.type == pygame.KEYDOWN:
+                if event.key == self.code:
+                    self.clicked = True
+            if event.type == pygame.KEYUP:
+                if event.key == self.code and self.clicked:
+                    self.callback()
