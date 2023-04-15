@@ -6,6 +6,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__(*groups)
 
         self.rect = pygame.rect.Rect(pos, (155, 126))
+        self.damage_rect = pygame.rect.Rect((pos[0]+37, pos[1]+33), (80, 60))
         self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
 
         atlas = pygame.image.load("img/player_atlas.png")
@@ -13,11 +14,15 @@ class Player(pygame.sprite.Sprite):
         empty_left = Animation(5, atlas, 126, 155, 126, 2)
         bomb_left = Animation(5, atlas, 253, 155, 126, 2)
         bomb_right = Animation(5, atlas, 379, 155, 126, 2)
+        damaged_right = Animation(5, atlas, 507, 155, 126, 2)
+        damaged_left = Animation(5, atlas, 633, 155, 126, 2)
         self.anim_manager = AnimationManager({
             "empty_left": empty_left,
             "empty_right": empty_right,
             "bomb_left": bomb_left,
-            "bomb_right": bomb_right
+            "bomb_right": bomb_right,
+            "damaged_left": damaged_left,
+            "damaged_right": damaged_right
         })
         self.anim_manager.set_anim("empty_right")
 
@@ -29,6 +34,9 @@ class Player(pygame.sprite.Sprite):
         self.state = "empty"
         self.bomb_type = None
         self.dir = "right"
+
+        self.damaged_timer = 0
+        self.damaged_time = 40
 
     def update(self, *events):
         self.direction.x = 0
@@ -48,7 +56,7 @@ class Player(pygame.sprite.Sprite):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 print(pygame.mouse.get_pos())
 
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN and self.state != "damaged":
                 if event.key == pygame.K_LEFT:
                     self.dir = "left"
                     if self.state == "empty":
@@ -63,13 +71,22 @@ class Player(pygame.sprite.Sprite):
                     elif self.state == "bomb":
                         self.anim_manager.set_anim("bomb_right")
 
-        if self.direction.length() > 0:
-            self.direction = self.direction.normalize()
-        self.x += self.direction.x * self.speed
-        self.y += self.direction.y * self.speed
+        if self.state != "damaged":
+            if self.direction.length() > 0:
+                self.direction = self.direction.normalize()
+            self.x += self.direction.x * self.speed
+            self.y += self.direction.y * self.speed
 
+        self.damage_rect.x += self.x-self.rect.x
+        self.damage_rect.y += self.y-self.rect.y
         self.rect.x = self.x
         self.rect.y = self.y
+
+        if self.state == "damaged":
+            self.damaged_timer += 1
+            if self.damaged_timer >= self.damaged_time:
+                self.damaged_timer = 0
+                self.set_state("empty")
 
         self.anim_manager.update()
 
@@ -97,3 +114,8 @@ class Player(pygame.sprite.Sprite):
                 self.anim_manager.set_anim("bomb_right")
             if self.dir == "left":
                 self.anim_manager.set_anim("bomb_left")
+        elif self.state == "damaged":
+            if self.dir == "right":
+                self.anim_manager.set_anim("damaged_right")
+            if self.dir == "left":
+                self.anim_manager.set_anim("damaged_left")

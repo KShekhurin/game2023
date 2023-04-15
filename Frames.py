@@ -5,6 +5,8 @@ from Player import *
 from Bomb import *
 from GameField import *
 from Cuba import *
+from Helicopter import *
+from Ship import *
 
 class Frame:
     def __init__(self):
@@ -169,8 +171,10 @@ class GameFrame(Frame):
         self.gui_group = pygame.sprite.Group()
         Label((10, 20), "Суверенитет: ", self.gui_group)
         Label((10, 60), "Пуговицы: ", self.gui_group)
-        self.sover_label = Label((200, 20), "100%", self.gui_group)
-        self.lives_label = Label((200, 60), "5", self.gui_group)
+        self.sover_bar = ProgressBar((200, 20), 100, self.gui_group)
+        self.lives_bar = HealthBar((200, 60), 5, self.gui_group)
+        #self.sover_label = Label((200, 20), "100%", self.gui_group)
+        #self.lives_label = Label((200, 60), "5", self.gui_group)
 
         self.player_group = pygame.sprite.Group()
         Player((100, 100), self.player_group)
@@ -180,14 +184,19 @@ class GameFrame(Frame):
         self.cuba_group = pygame.sprite.Group()
         Cuba(self.cuba_group)
 
-        self.game_field = GameField(self.player_group.sprites()[0], self.bombs_group, self.cuba_group, self.sover_label, self.lives_label, self.lose)
+        self.helicopters_group = pygame.sprite.Group()
+        self.ship_group = pygame.sprite.Group()
+
+        self.game_field = GameField(self.player_group.sprites()[0], self.bombs_group, self.helicopters_group, self.cuba_group, self.ship_group, self.sover_bar, self.lives_bar, self.lose)
 
         self.append_many_widgets((
             self.background_group,
-            self.gui_group,
+            self.ship_group,
             self.cuba_group,
             self.bombs_group,
             self.player_group,
+            self.helicopters_group,
+            self.gui_group,
         ))
         self.updatable.append(self.game_field)
 

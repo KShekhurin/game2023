@@ -239,6 +239,51 @@ class SliderWithValue(pygame.sprite.Sprite):
         
         self.draw()
 
+class ProgressBar(pygame.sprite.Sprite):
+    def __init__(self, pos, level, *groups):
+        super().__init__(*groups)
+
+        self.level = level
+        self.rect = pygame.rect.Rect(pos, (level * 2.5, 30))
+        self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+
+    def set_level(self, level):
+        self.level = level
+
+    def update(self, *events):
+        self.draw()
+
+    def draw(self):
+        self.image.fill((0, 0, 0, 0))
+
+        self.image.fill((240, 12, 12), pygame.rect.Rect((0, 0), (self.level * 2.5, 30)))
+
+class HealthBar(pygame.sprite.Sprite):
+    def __init__(self, pos, lives, *groups):
+        super().__init__(*groups)
+
+        self.inner_group = pygame.sprite.Group()
+        self.rect = pygame.rect.Rect(pos, (250, 30))
+        self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+        self.last_life = lives-1
+
+        self.lives = []
+
+        for i in range(lives):
+            self.lives += [Image((i*50, 0), (30, 30), "img/pug.png", self.inner_group)]
+
+    def delete_life(self):
+        self.lives[self.last_life].kill()
+        self.last_life -= 1
+
+    def update(self, *events):
+        self.inner_group.update(*events)
+
+        self.draw()
+
+    def draw(self):
+        self.image.fill((0, 0, 0, 0))
+        self.inner_group.draw(self.image)
 
 class Catcher:
     def __init__(self, code, callback):
