@@ -8,6 +8,7 @@ class App:
         self.loaded_frame = loaded_frame
 
     def start(self):
+        
         pygame.init()
         pygame.display.set_caption("Soy Cuba")
         pygame.font.init()
