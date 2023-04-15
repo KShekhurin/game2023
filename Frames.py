@@ -3,6 +3,8 @@ import pygame
 from Widgets import *
 from Player import *
 from Bomb import *
+from GameField import *
+from Cuba import *
 
 class Frame:
     def __init__(self):
@@ -123,16 +125,51 @@ class GameFrame(Frame):
     def post_init(self, app):
         super().post_init(app)
 
+        self.background_group = pygame.sprite.Group()
+        Image((0, 0), self.app.start_size, "img/game_bg.png", self.background_group)
+
+        self.gui_group = pygame.sprite.Group()
+        Label((10, 20), "Суверенитет: ", self.gui_group)
+        Label((10, 60), "Пуговицы: ", self.gui_group)
+        self.sover_label = Label((200, 20), "100%", self.gui_group)
+        self.lives_label = Label((200, 60), "5", self.gui_group)
+
         self.player_group = pygame.sprite.Group()
         Player((100, 100), self.player_group)
 
         self.bombs_group = pygame.sprite.Group()
-        Bomb((100, 500), 1, self.bombs_group)
+
+        self.cuba_group = pygame.sprite.Group()
+        Cuba(self.cuba_group)
+
+        self.game_field = GameField(self.player_group.sprites()[0], self.bombs_group, self.cuba_group, self.sover_label, self.lives_label, self.lose)
 
         self.append_many_widgets((
+            self.background_group,
+            self.gui_group,
+            self.cuba_group,
+            self.bombs_group,
             self.player_group,
-            self.bombs_group
         ))
+        self.updatable.append(self.game_field)
+
+    def lose(self):
+        self.app.reload_frame(LostFrame())
+
+class LostFrame(Frame):
+    def __init__(self):
+        super().__init__()
+
+    def post_init(self, app):
+        super().post_init(app)
+
+        self.background_group = pygame.sprite.Group()
+        Image((0, 0), self.app.start_size, "img/lost_bg.png", self.background_group)
+
+        self.append_many_widgets((
+            self.background_group,
+        ))
+
 class StoryFrame(Frame):
     def __init__(self, image, next_frame):
         super().__init__()

@@ -6,10 +6,12 @@ class Bomb(pygame.sprite.Sprite):
 
         self.type = type
 
-        self.rect = pygame.rect.Rect(pos, (124, 203))
+        size = (45, 100) if type == 0 else (69, 150)
+        texture = "img/weapon.png" if type == 0 else "img/great_weapon.png"
+        self.rect = pygame.rect.Rect(pos, size)
         self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
 
-        self.texture = pygame.image.load("img/bomb.png")
+        self.texture = pygame.image.load(texture)
 
     def update(self, *events):
         self.draw()
