@@ -43,6 +43,12 @@ class MenuFrame(Frame):
 
     def goto_story(self):
         self.app.reload_frame(self.story_frame)
+
+    def return_to_menu(self):
+        self.app.reload_frame(self)
+        
+    def goto_help(self):
+        self.app.reload_frame(HelpFrame(self.return_to_menu))
         
     def exit(self):
         sys.exit() # Да, это плохо. Я протяну колбеки, но потом.
@@ -51,10 +57,32 @@ class MenuFrame(Frame):
         super().post_init(app)
 
         self.story_frame = StoryFrame(
+            app,
             "./img/story/f1.png",
             StoryFrame(
+                app,
                 "./img/story/f2.png",
-                self
+                StoryFrame(
+                    app,
+                    "./img/story/f3.png",
+                    StoryFrame(
+                        app,
+                        "./img/story/f4.png",
+                        StoryFrame(
+                            app,
+                            "./img/story/f5.png",
+                            StoryFrame(
+                                app,
+                                "./img/story/f6.png",
+                                StoryFrame(
+                                    app,
+                                    "./img/story/f7.png",
+                                    self
+                                )
+                            )
+                        )
+                    )
+                )
             )
         )
         
@@ -62,7 +90,7 @@ class MenuFrame(Frame):
         self.background_group = pygame.sprite.Group()
 
         background = Image(
-            (0,0), (800, 600), "./img/mainm_bg.png", self.background_group
+            (0,0), self.app.start_size, "./img/mainm_bg.png", self.background_group
         )
         
         new_game_params = PicButtonDesignParams()
@@ -75,11 +103,21 @@ class MenuFrame(Frame):
         settings_params.focuse_pic = "./img/set_f.png"
         PicButton((20, 90 + 300), (300, 70), "", settings_params, self.goto_settings, self.buttons_group)
 
+        story_params = PicButtonDesignParams()
+        story_params.pic = "./img/story.png"
+        story_params.focuse_pic = "./img/story_f.png"
+        PicButton((20, 170 + 300), (300, 70), "", story_params, self.goto_story, self.buttons_group)
+
         exit_params = PicButtonDesignParams()
         exit_params.pic = "./img/exit.png"
         exit_params.focuse_pic = "./img/exit_f.png"
-        PicButton((20, 170 + 300), (300, 70), "", exit_params, self.exit, self.buttons_group)
+        PicButton((20, 250 + 300), (300, 70), "", exit_params, self.exit, self.buttons_group)
 
+        help_params = PicButtonDesignParams()
+        help_params.pic = "./img/help.png"
+        help_params.focuse_pic = "./img/help_f.png"
+        PicButton((1000 - 20 - 70, 20), (70, 70), "", help_params, self.goto_help, self.buttons_group)
+        
         Label((70, 100), "Съешь ещё больше этих сладких французских булок.", self.buttons_group)
 
         self.append_many_widgets((
@@ -174,6 +212,35 @@ class StoryFrame(Frame):
     def __init__(self, image, next_frame):
         super().__init__()
 
+class HelpFrame(Frame):
+    def __init__(self, back_call):
+        super().__init__()
+        self.back_call = back_call
+        
+    def post_init(self, app):
+        super().post_init(app)
+        self.buttons_group = pygame.sprite.Group()
+        self.background_group = pygame.sprite.Group()
+        
+        Image((0, 0), self.app.start_size, "./img/help_bg.png", self.background_group)
+        back_params = PicButtonDesignParams()
+        
+        back_params.pic = "./img/back.png"
+        back_params.focuse_pic = "./img/back_f.png"
+        PicButton((1000 - 200, 750 - 50 - 15), (200, 50), "Вернуться", back_params, self.back_call, self.buttons_group)
+        
+        self.append_many_widgets((
+            self.background_group,
+            self.buttons_group
+        ))
+
+        
+        
+class StoryFrame(Frame):
+    def __init__(self, app, image, next_frame):
+        super().__init__()
+        self.app = app
+        
         def goto_next():
             self.app.reload_frame(next_frame)
         
@@ -185,7 +252,7 @@ class StoryFrame(Frame):
             (0, 0), "Для продолжения нажмите пробел...", self.label_group
         )
         background = Image(
-            (0, 0), (800, 600), image, self.background_group
+            (0, 0), self.app.start_size, image, self.background_group
         )
         catcher = Catcher(pygame.K_SPACE, goto_next)
         
