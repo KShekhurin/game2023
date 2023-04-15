@@ -94,8 +94,14 @@ class PicButton(Button):
         super().__init__(pos, size, text, ButtonDesignParams(), onClick, *groups)
 
         self.design = design
-        self.loaded_focus = pygame.image.load(self.design.focuse_pic)
-        self.loaded_pic = pygame.image.load(self.design.pic)
+        self.loaded_focus = pygame.transform.scale(
+            pygame.image.load(self.design.focuse_pic),
+            size
+        )
+        self.loaded_pic = pygame.transform.scale(
+            pygame.image.load(self.design.pic),
+            size
+        )
 
     def draw(self):
         picture = self.loaded_focus if self.focused else self.loaded_pic
