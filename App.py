@@ -1,5 +1,4 @@
 import pygame
-import moviepy.editor
 from Frames import Frame
 
 class App:
@@ -12,9 +11,6 @@ class App:
         pygame.init()
         pygame.display.set_caption("Soy Cuba")
         pygame.font.init()
-
-        video = moviepy.editor.VideoFileClip("./img/zast.webm")
-        video.preview()
         
         self.clock = pygame.time.Clock()
         
