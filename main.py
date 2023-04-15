@@ -4,7 +4,7 @@ from Frames import MenuFrame
 
 def main():
     frame = MenuFrame()
-    application = App(frame, (800, 600))
+    application = App(frame, (1000, 750))
     application.start()
 
 

@@ -3,13 +3,14 @@ from Frames import Frame
 
 
 class App:
-    def __init__(self, loaded_frame: Frame, start_size=(200, 200)):
+    def __init__(self, loaded_frame: Frame, start_size=(480, 320)):
         self.start_size = start_size
         self.loaded_frame = loaded_frame
 
     def start(self):
         pygame.init()
         pygame.font.init()
+        self.clock = pygame.time.Clock()
         
         screen = pygame.display.set_mode(self.start_size)
         run = True
@@ -17,6 +18,8 @@ class App:
         self.loaded_frame.post_init(self)
 
         while run:
+            self.clock.tick(50)
+
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:

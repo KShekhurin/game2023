@@ -1,7 +1,8 @@
 import sys
 import pygame
 from Widgets import Button, ButtonDesignParams, Label, PicButton, PicButtonDesignParams, Slider, SliderWithValue
-
+from Player import *
+from Bomb import *
 
 class Frame:
     def __init__(self):
@@ -35,6 +36,9 @@ class MenuFrame(Frame):
     def goto_settings(self):
         self.app.reload_frame(SettingsFrame())
 
+    def start_game(self):
+        self.app.reload_frame(GameFrame())
+
     def exit(self):
         sys.exit() # Да, это плохо. Я протяну колбеки, но потом.
 
@@ -46,7 +50,7 @@ class MenuFrame(Frame):
         new_game_params = PicButtonDesignParams()
         new_game_params.pic = "./img/ng.png"
         new_game_params.focuse_pic = "./img/ng_f.png"
-        PicButton((20, 10 + 300), (300, 70), "", new_game_params, self.goto_settings, self.buttons_group)
+        PicButton((20, 10 + 300), (300, 70), "", new_game_params, self.start_game, self.buttons_group)
         
         #Button((20, 10 + 300), (250, 70), "Начать игру", ButtonDesignParams(), None, self.buttons_group)
         settings_params = PicButtonDesignParams()
@@ -93,4 +97,22 @@ class SettingsFrame(Frame):
 
         self.append_many_widgets((
             self.buttons_group,
+        ))
+
+class GameFrame(Frame):
+    def __init__(self):
+        super().__init__()
+
+    def post_init(self, app):
+        super().post_init(app)
+
+        self.player_group = pygame.sprite.Group()
+        Player((100, 100), self.player_group)
+
+        self.bombs_group = pygame.sprite.Group()
+        Bomb((100, 500), 1, self.bombs_group)
+
+        self.append_many_widgets((
+            self.player_group,
+            self.bombs_group
         ))
