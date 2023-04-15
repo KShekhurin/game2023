@@ -1,6 +1,6 @@
 import sys
 import pygame
-from Widgets import Button, ButtonDesignParams, Label, PicButton, PicButtonDesignParams, Slider, SliderWithValue
+from Widgets import *
 from Player import *
 from Bomb import *
 
@@ -39,20 +39,35 @@ class MenuFrame(Frame):
     def start_game(self):
         self.app.reload_frame(GameFrame())
 
+    def goto_story(self):
+        self.app.reload_frame(self.story_frame)
+        
     def exit(self):
         sys.exit() # Да, это плохо. Я протяну колбеки, но потом.
 
     def post_init(self, app):
         super().post_init(app)
 
+        self.story_frame = StoryFrame(
+            "./img/story/f1.png",
+            StoryFrame(
+                "./img/story/f2.png",
+                self
+            )
+        )
+        
         self.buttons_group = pygame.sprite.Group()
+        self.background_group = pygame.sprite.Group()
+
+        background = Image(
+            (0,0), (800, 600), "./img/mainm_bg.png", self.background_group
+        )
         
         new_game_params = PicButtonDesignParams()
         new_game_params.pic = "./img/ng.png"
         new_game_params.focuse_pic = "./img/ng_f.png"
         PicButton((20, 10 + 300), (300, 70), "", new_game_params, self.start_game, self.buttons_group)
         
-        #Button((20, 10 + 300), (250, 70), "Начать игру", ButtonDesignParams(), None, self.buttons_group)
         settings_params = PicButtonDesignParams()
         settings_params.pic = "./img/set.png"
         settings_params.focuse_pic = "./img/set_f.png"
@@ -66,7 +81,8 @@ class MenuFrame(Frame):
         Label((70, 100), "Съешь ещё больше этих сладких французских булок.", self.buttons_group)
 
         self.append_many_widgets((
-            self.buttons_group,
+            self.background_group,
+            self.buttons_group
         ))
 
 class SettingsFrame(Frame):
@@ -80,7 +96,8 @@ class SettingsFrame(Frame):
         super().post_init(app)
 
         self.buttons_group = pygame.sprite.Group()
-
+    
+        
         Label((250, 20), "Громкость:", self.buttons_group)
         SliderWithValue((250, 20 + 50), (255, 70), 0, self.buttons_group)
 
@@ -116,3 +133,31 @@ class GameFrame(Frame):
             self.player_group,
             self.bombs_group
         ))
+class StoryFrame(Frame):
+    def __init__(self, image, next_frame):
+        super().__init__()
+
+        def goto_next():
+            self.app.reload_frame(next_frame)
+        
+        self.background_group = pygame.sprite.Group()
+        self.label_group = pygame.sprite.Group()
+        self.catcher_group = pygame.sprite.Group()
+
+        label = Label(
+            (0, 0), "Для продолжения нажмите пробел...", self.label_group
+        )
+        background = Image(
+            (0, 0), (800, 600), image, self.background_group
+        )
+        catcher = Catcher(pygame.K_SPACE, goto_next)
+        
+        self.updatable.append(catcher)
+        self.append_many_widgets((
+            self.background_group,
+            self.label_group
+        ))
+        
+        
+        
+        
