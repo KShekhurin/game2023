@@ -3,7 +3,6 @@ from Bomb import *
 from random import randrange
 from Helicopter import *
 from Ship import *
-from App import explosion
 
 class GameField:
     def __init__(self, player, bomb_group, helic_group, cuba, ship, sover_label, lives_label, lose_callback):

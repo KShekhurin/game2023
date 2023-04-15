@@ -7,7 +7,6 @@ from Player import *
 from Bomb import *
 from GameField import *
 from Cuba import *
-from App import *
 
 class Frame:
     def __init__(self):
