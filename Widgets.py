@@ -1,5 +1,5 @@
 import pygame
-
+import ctypes
 
 class ButtonDesignParams:
     def __init__(self):
@@ -14,6 +14,22 @@ class PicButtonDesignParams:
         self.focuse_pic = ""
         self.pic = ""
 
+class VideoPlayer(pygame.sprite.Sprite):
+    def __init__(self, pos=(0, 0), size=(10, 10), player=None, *groups) -> None:
+        super().__init__(*groups)
+
+        self.player = player
+        self.rect = pygame.rect.Rect(pos, size)
+        self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+        
+    def draw(self):
+        self.player.dispatch_events()
+        tex = self.player.get_texture()
+        raw = tex.get_image_data().get_data('RGBA',tex.width*4)
+        raw = ctypes.string_at(ctypes.addressof(raw), ctypes.sizeof(raw))
+        img = pygame.image.frombuffer(raw, (tex.width, tex.height), 'RGBA')
+        self.image.blit(img, (0,0))
+        
 class Image(pygame.sprite.Sprite):
     def __init__(self, pos=(0, 0), size=(10, 10),
                  image="", *groups) -> None:

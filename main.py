@@ -1,5 +1,5 @@
 from App import App
-from Frames import MenuFrame
+from Frames import LogoFrame, MenuFrame
 
 
 def main():

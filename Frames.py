@@ -1,10 +1,15 @@
 import sys
 import pygame
+from pygame.mixer import music
+import pyglet
 from Widgets import *
 from Player import *
 from Bomb import *
 from GameField import *
 from Cuba import *
+
+music = 0.5
+effects = 0.5
 
 class Frame:
     def __init__(self):
@@ -31,6 +36,23 @@ class Frame:
             drawable.draw(screen)
 
 
+class LogoFrame(Frame):
+    def __init__(self):
+        super().__init__()
+
+    def start_game(self):
+        self.app.reload_frame(MenuFrame())
+
+    def post_init(self, app):
+        super().post_init(app)
+
+        player = pyglet.media.Player()
+        player.on_eos()
+        source = pyglet.media.load("./img/zast.webm")
+        player.queue(source)
+        player.play()
+            
+
 class MenuFrame(Frame):
     def __init__(self):
         super().__init__()
@@ -55,6 +77,11 @@ class MenuFrame(Frame):
 
     def post_init(self, app):
         super().post_init(app)
+
+        pygame.mixer.music.load(
+            "./img/soundtrack.mp3"
+        )
+        music.play(-1)
 
         self.story_frame = StoryFrame(
             app,
@@ -96,29 +123,27 @@ class MenuFrame(Frame):
         new_game_params = PicButtonDesignParams()
         new_game_params.pic = "./img/ng.png"
         new_game_params.focuse_pic = "./img/ng_f.png"
-        PicButton((20, 10 + 300), (300, 70), "", new_game_params, self.start_game, self.buttons_group)
+        PicButton((20 - 10, 10 + 300), (300, 70), "", new_game_params, self.start_game, self.buttons_group)
         
         settings_params = PicButtonDesignParams()
         settings_params.pic = "./img/set.png"
         settings_params.focuse_pic = "./img/set_f.png"
-        PicButton((20, 90 + 300), (300, 70), "", settings_params, self.goto_settings, self.buttons_group)
+        PicButton((20 - 10, 90 + 300), (300, 70), "", settings_params, self.goto_settings, self.buttons_group)
 
         story_params = PicButtonDesignParams()
         story_params.pic = "./img/story.png"
         story_params.focuse_pic = "./img/story_f.png"
-        PicButton((20, 170 + 300), (300, 70), "", story_params, self.goto_story, self.buttons_group)
+        PicButton((20 - 10, 170 + 300), (300, 70), "", story_params, self.goto_story, self.buttons_group)
 
         exit_params = PicButtonDesignParams()
         exit_params.pic = "./img/exit.png"
         exit_params.focuse_pic = "./img/exit_f.png"
-        PicButton((20, 250 + 300), (300, 70), "", exit_params, self.exit, self.buttons_group)
+        PicButton((20 - 10, 250 + 300), (300, 70), "", exit_params, self.exit, self.buttons_group)
 
         help_params = PicButtonDesignParams()
         help_params.pic = "./img/help.png"
         help_params.focuse_pic = "./img/help_f.png"
         PicButton((1000 - 20 - 70, 20), (70, 70), "", help_params, self.goto_help, self.buttons_group)
-        
-        Label((70, 100), "Съешь ещё больше этих сладких французских булок.", self.buttons_group)
 
         self.append_many_widgets((
             self.background_group,
@@ -132,14 +157,25 @@ class SettingsFrame(Frame):
     def goto_menu(self):
         self.app.reload_frame(MenuFrame())
 
+    def update_sound(self):
+        music = self.music.level
+        effects = self.effects.level
+
     def post_init(self, app):
         super().post_init(app)
 
         self.buttons_group = pygame.sprite.Group()
-    
+        self.background_group = pygame.sprite.Group()
+
+        background = Image(
+            (0,0), self.app.start_size, "./img/settings_bg.png", self.background_group
+        )
         
-        Label((250, 20), "Громкость:", self.buttons_group)
-        SliderWithValue((250, 20 + 50), (255, 70), 0, self.buttons_group)
+        Label((250, 20 + 23 + 90), "Громкость:", self.buttons_group)
+        self.music = SliderWithValue((250 + 150, 20 + 90), (255, 70), 0, self.buttons_group)
+
+        Label((250, 20 + 23 + 80 + 90), "Эффекты:", self.buttons_group)
+        self.effects = SliderWithValue((250 + 150, 20 + 80 + 90), (255, 70), 0, self.buttons_group)
 
         back_params = PicButtonDesignParams()
         back_params.pic = "./img/back.png"
@@ -149,10 +185,11 @@ class SettingsFrame(Frame):
         save_params.pic = "./img/save.png"
         save_params.focuse_pic = "./img/save_f.png"
         
-        PicButton((250, 20 + 150), (300, 70), "Сохранить", save_params, None, self.buttons_group)
-        PicButton((575, 525), (200, 50), "Вернуться", back_params, self.goto_menu, self.buttons_group)
+        PicButton((350, 20 + 100 + 80 + 90), (300, 70), "Сохранить", save_params, None, self.buttons_group)
+        PicButton((400, 20 + 100 + 80 + 300), (200, 50), "Вернуться", back_params, self.goto_menu, self.buttons_group)
 
         self.append_many_widgets((
+            self.background_group,
             self.buttons_group,
         ))
 
@@ -198,19 +235,31 @@ class LostFrame(Frame):
     def __init__(self):
         super().__init__()
 
+    def to_menu(self):
+        self.app.reload_frame(MenuFrame())
+        
     def post_init(self, app):
         super().post_init(app)
+        pygame.mixer.music.load(
+            "./img/gameover.mp3"
+        )
+        music.play(-1)
 
         self.background_group = pygame.sprite.Group()
+        self.label_group = pygame.sprite.Group()
+        label = Label(
+            (0, 0), "Для продолжения нажмите пробел...", self.label_group
+        )
+        
         Image((0, 0), self.app.start_size, "img/lost_bg.png", self.background_group)
 
+        catcher = Catcher(pygame.K_SPACE, self.to_menu)
+        
         self.append_many_widgets((
             self.background_group,
+            self.label_group
         ))
-
-class StoryFrame(Frame):
-    def __init__(self, image, next_frame):
-        super().__init__()
+        self.updatable.append(catcher)
 
 class HelpFrame(Frame):
     def __init__(self, back_call):

@@ -1,6 +1,6 @@
 import pygame
+import moviepy.editor
 from Frames import Frame
-
 
 class App:
     def __init__(self, loaded_frame: Frame, start_size=(480, 320)):
@@ -9,7 +9,12 @@ class App:
 
     def start(self):
         pygame.init()
+        pygame.display.set_caption("Soy Cuba")
         pygame.font.init()
+
+        video = moviepy.editor.VideoFileClip("./img/zast.webm")
+        video.preview()
+        
         self.clock = pygame.time.Clock()
         
         screen = pygame.display.set_mode(self.start_size)
